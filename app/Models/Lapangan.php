@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'tanggal_sertifikasi',
     'alamat',
     'dokumen_legalitas',
+    'foto',
     'is_active'
 ])]
 class Lapangan extends Model

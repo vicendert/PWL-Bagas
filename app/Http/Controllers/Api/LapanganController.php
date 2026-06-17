@@ -31,17 +31,23 @@ class LapanganController extends Controller
             'tanggal_sertifikasi' => 'required|date',
             'alamat' => 'nullable|string',
             'dokumen_legalitas' => 'nullable|file|mimes:pdf|max:2048', // PDF Max 2MB
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Image Max 2MB
         ]);
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        $data = $request->except('dokumen_legalitas');
+        $data = $request->except(['dokumen_legalitas', 'foto']);
 
         if ($request->hasFile('dokumen_legalitas')) {
             $path = $request->file('dokumen_legalitas')->store('public/dokumen');
             $data['dokumen_legalitas'] = Storage::url($path);
+        }
+
+        if ($request->hasFile('foto')) {
+            $path = $request->file('foto')->store('public/lapangan');
+            $data['foto'] = Storage::url($path);
         }
 
         $lapangan = Lapangan::create($data);
@@ -68,13 +74,14 @@ class LapanganController extends Controller
             'tanggal_sertifikasi' => 'required|date',
             'alamat' => 'nullable|string',
             'dokumen_legalitas' => 'nullable|file|mimes:pdf|max:2048',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        $data = $request->except('dokumen_legalitas');
+        $data = $request->except(['dokumen_legalitas', 'foto']);
 
         if ($request->hasFile('dokumen_legalitas')) {
             if ($lapangan->dokumen_legalitas) {
@@ -83,6 +90,15 @@ class LapanganController extends Controller
             }
             $path = $request->file('dokumen_legalitas')->store('public/dokumen');
             $data['dokumen_legalitas'] = Storage::url($path);
+        }
+
+        if ($request->hasFile('foto')) {
+            if ($lapangan->foto) {
+                $oldPath = str_replace('/storage/', 'public/', $lapangan->foto);
+                Storage::delete($oldPath);
+            }
+            $path = $request->file('foto')->store('public/lapangan');
+            $data['foto'] = Storage::url($path);
         }
 
         $lapangan->update($data);
@@ -100,6 +116,11 @@ class LapanganController extends Controller
 
         if ($lapangan->dokumen_legalitas) {
             $oldPath = str_replace('/storage/', 'public/', $lapangan->dokumen_legalitas);
+            Storage::delete($oldPath);
+        }
+
+        if ($lapangan->foto) {
+            $oldPath = str_replace('/storage/', 'public/', $lapangan->foto);
             Storage::delete($oldPath);
         }
 

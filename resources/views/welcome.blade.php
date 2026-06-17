@@ -728,13 +728,26 @@ tr:hover td { background: #fafbff; }
         <div x-show="page==='beranda'">
           <div class="breadcrumb"><span>Sewa Lapangan</span></div>
           <div class="card">
-            <div class="card-header"><div class="card-title">🏟️ Daftar Lapangan Tersedia</div></div>
+            <div class="card-header">
+              <div class="card-title">🏟️ Daftar Lapangan Tersedia</div>
+              <button class="btn btn-primary btn-sm" @click="openModal('lap-add')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Tambah Lapangan
+              </button>
+            </div>
             <div class="card-body">
               <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
                 <template x-for="l in lookups.lapangan" :key="l.id">
-                  <div class="stat-card" style="cursor:default">
-                    <div class="stat-icon blue" style="margin-bottom:12px">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+                  <div class="stat-card" style="cursor:default;display:flex;flex-direction:column;justify-content:between">
+                    <div style="width:100%;height:140px;border-radius:8px;overflow:hidden;margin-bottom:12px;background:#f1f5f9;display:flex;align-items:center;justify-content:center">
+                      <template x-if="l.foto">
+                        <img :src="l.foto" style="width:100%;height:100%;object-fit:cover">
+                      </template>
+                      <template x-if="!l.foto">
+                        <div class="stat-icon blue" style="width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center">
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+                        </div>
+                      </template>
                     </div>
                     <div style="font-size:15px;font-weight:700;margin-bottom:4px" x-text="l.nama_lapangan"></div>
                     <div style="font-size:12px;color:var(--text-muted)" x-text="l.kode"></div>
@@ -742,7 +755,13 @@ tr:hover td { background: #fafbff; }
                       <span class="badge badge-info" x-text="l.kategori_lapangan ? l.kategori_lapangan.nama_kategori : '—'"></span>
                       <span class="badge badge-purple" x-text="l.akreditasi"></span>
                     </div>
-                    <div style="font-size:12px;color:var(--text-muted);margin-top:8px" x-text="l.cabang ? l.cabang.nama_cabang : ''"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);width:100%">
+                      <div style="font-size:12px;color:var(--text-muted)" x-text="l.cabang ? l.cabang.nama_cabang : ''"></div>
+                      <div class="action-btns" style="display:flex;gap:4px">
+                        <button class="btn-icon edit" @click.stop="editLapangan(l)" title="Edit">✏️</button>
+                        <button class="btn-icon delete" @click.stop="deleteLapangan(l.id)" title="Hapus">🗑️</button>
+                      </div>
+                    </div>
                   </div>
                 </template>
               </div>
@@ -1052,6 +1071,16 @@ tr:hover td { background: #fafbff; }
                   <label class="field-label">Dokumen Legalitas (PDF, maks 2MB)</label>
                   <input class="field-file" type="file" accept=".pdf" @change="form.dokumen_legalitas = $event.target.files[0]">
                   <div class="field-hint">Hanya file PDF dengan ukuran maksimal 2MB</div>
+                </div>
+                <div class="field-group" style="margin-top:12px">
+                  <label class="field-label">Foto Lapangan (JPG, PNG, WebP, maks 2MB)</label>
+                  <input class="field-file" type="file" accept="image/*" @change="form.foto = $event.target.files[0]; if(form.foto) { const reader = new FileReader(); reader.onload = (e) => form.foto_preview = e.target.result; reader.readAsDataURL(form.foto); } else { form.foto_preview = null; }">
+                  <div class="field-hint">Format gambar (JPG, PNG, WebP) dengan ukuran maksimal 2MB</div>
+                  <template x-if="form.foto_preview">
+                    <div style="margin-top:8px">
+                      <img :src="form.foto_preview" style="max-height:100px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">
+                    </div>
+                  </template>
                 </div>
               </div>
               <div class="modal-footer">
@@ -2260,6 +2289,7 @@ function sportsApp() {
       const fields = ['hub_pusat_id','cabang_id','kategori_lapangan_id','kode','nama_lapangan','akreditasi','nomor_sk','tanggal_sertifikasi','alamat'];
       fields.forEach(f => { if(this.form[f] !== undefined && this.form[f] !== null) fd.append(f, this.form[f]); });
       if(this.form.dokumen_legalitas) fd.append('dokumen_legalitas', this.form.dokumen_legalitas);
+      if(this.form.foto) fd.append('foto', this.form.foto);
       if(this.editingId) fd.append('_method','PUT');
       const url = this.editingId ? `/api/lapangan/${this.editingId}` : '/api/lapangan';
       const r = await fetch(url, { method:'POST', headers:{'Accept':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'}, body:fd });
@@ -2271,7 +2301,7 @@ function sportsApp() {
       this.editingId=l.id;
       this.form={hub_pusat_id:l.hub_pusat_id,cabang_id:l.cabang_id,kategori_lapangan_id:l.kategori_lapangan_id,
         kode:l.kode,nama_lapangan:l.nama_lapangan,akreditasi:l.akreditasi,
-        nomor_sk:l.nomor_sk,tanggal_sertifikasi:l.tanggal_sertifikasi,alamat:l.alamat};
+        nomor_sk:l.nomor_sk,tanggal_sertifikasi:l.tanggal_sertifikasi,alamat:l.alamat,foto_preview:l.foto};
       this.modal='lap-edit';
     },
     async deleteLapangan(id) {
