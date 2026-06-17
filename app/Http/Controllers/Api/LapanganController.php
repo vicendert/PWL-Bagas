@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Lapangan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+
+class LapanganController extends Controller
+{
+    public function index()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => Lapangan::with(['hubPusat', 'kategoriLapangan', 'cabang'])->get()
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'hub_pusat_id' => 'required|exists:hub_pusat,id',
+            'kategori_lapangan_id' => 'required|exists:kategori_lapangan,id',
+            'cabang_id' => 'required|exists:cabang,id',
+            'kode' => 'required|string|max:20|unique:lapangan,kode',
+            'nama_lapangan' => 'required|string|max:255',
+            'akreditasi' => 'required|in:A,B,C,Unggul',
+            'nomor_sk' => 'required|string|max:100',
+            'tanggal_sertifikasi' => 'required|date',
+            'alamat' => 'nullable|string',
+            'dokumen_legalitas' => 'nullable|file|mimes:pdf|max:2048', // PDF Max 2MB
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $data = $request->except('dokumen_legalitas');
+
+        if ($request->hasFile('dokumen_legalitas')) {
+            $path = $request->file('dokumen_legalitas')->store('public/dokumen');
+            $data['dokumen_legalitas'] = Storage::url($path);
+        }
+
+        $lapangan = Lapangan::create($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data lapangan berhasil ditambahkan',
+            'data' => $lapangan
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $lapangan = Lapangan::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'hub_pusat_id' => 'required|exists:hub_pusat,id',
+            'kategori_lapangan_id' => 'required|exists:kategori_lapangan,id',
+            'cabang_id' => 'required|exists:cabang,id',
+            'kode' => 'required|string|max:20|unique:lapangan,kode,' . $id,
+            'nama_lapangan' => 'required|string|max:255',
+            'akreditasi' => 'required|in:A,B,C,Unggul',
+            'nomor_sk' => 'required|string|max:100',
+            'tanggal_sertifikasi' => 'required|date',
+            'alamat' => 'nullable|string',
+            'dokumen_legalitas' => 'nullable|file|mimes:pdf|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $data = $request->except('dokumen_legalitas');
+
+        if ($request->hasFile('dokumen_legalitas')) {
+            if ($lapangan->dokumen_legalitas) {
+                $oldPath = str_replace('/storage/', 'public/', $lapangan->dokumen_legalitas);
+                Storage::delete($oldPath);
+            }
+            $path = $request->file('dokumen_legalitas')->store('public/dokumen');
+            $data['dokumen_legalitas'] = Storage::url($path);
+        }
+
+        $lapangan->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data lapangan berhasil diperbarui',
+            'data' => $lapangan
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $lapangan = Lapangan::findOrFail($id);
+
+        if ($lapangan->dokumen_legalitas) {
+            $oldPath = str_replace('/storage/', 'public/', $lapangan->dokumen_legalitas);
+            Storage::delete($oldPath);
+        }
+
+        $lapangan->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data lapangan berhasil dihapus'
+        ]);
+    }
+}
