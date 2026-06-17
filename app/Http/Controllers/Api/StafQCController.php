@@ -42,6 +42,25 @@ class StafQCController extends Controller
         ]);
     }
 
+    public function update(Request $request, $id)
+    {
+        $staf = StafQC::findOrFail($id);
+        $validator = Validator::make($request->all(), [
+            'nik' => 'required|string|max:50|unique:staf_qc,nik,' . $id,
+            'nama_staf' => 'required|string|max:255',
+            'gelar' => 'nullable|string|max:50',
+            'jenis_kelamin' => 'required|in:L,P',
+            'jabatan' => 'required|string|max:100',
+            'cabang_id' => 'required|exists:cabang,id',
+            'lapangan_id' => 'required|exists:lapangan,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+        $staf->update($request->all());
+        return response()->json(['success' => true, 'message' => 'Staf QC berhasil diperbarui', 'data' => $staf]);
+    }
+
     public function destroy($id)
     {
         $staf = StafQC::findOrFail($id);

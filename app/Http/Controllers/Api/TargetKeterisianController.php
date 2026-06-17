@@ -51,4 +51,27 @@ class TargetKeterisianController extends Controller
             'data' => $target
         ]);
     }
+
+    public function update(Request $request, $id)
+    {
+        $target = TargetKeterisian::findOrFail($id);
+        $validator = Validator::make($request->all(), [
+            'lapangan_id' => 'required|exists:lapangan,id',
+            'tahun' => 'required|integer|min:2000|max:2100',
+            'bulan' => 'required|integer|min:1|max:12',
+            'target_jam' => 'required|integer|min:1',
+            'realisasi_jam' => 'nullable|integer|min:0',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+        $target->update($request->all());
+        return response()->json(['success' => true, 'message' => 'Target berhasil diperbarui', 'data' => $target]);
+    }
+
+    public function destroy($id)
+    {
+        TargetKeterisian::findOrFail($id)->delete();
+        return response()->json(['success' => true, 'message' => 'Target berhasil dihapus']);
+    }
 }

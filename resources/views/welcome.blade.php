@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Sistem Manajemen Sewa Lapangan Olahraga — Platform terintegrasi untuk mengelola reservasi, fasilitas, dan kualitas lapangan.">
-<title>SportSpace — Manajemen Sewa Lapangan</title>
+<meta name="description" content="SportSpace — Platform manajemen sewa lapangan olahraga terpadu. Kelola reservasi, fasilitas, dan kualitas lapangan dengan mudah.">
+<title>SportSpace — Platform Manajemen Lapangan Olahraga</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
@@ -352,19 +352,256 @@ tr:hover td { background: #fafbff; }
 .page-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
 .page-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-/* ── Toast ── */
-.toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+/* ── Toast Enhanced ── */
+.toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
 .toast {
-  display: flex; align-items: center; gap: 10px; padding: 14px 18px;
-  border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.15);
-  font-size: 14px; font-weight: 500; min-width: 260px; max-width: 380px;
-  animation: toastIn .3s ease-out;
-  transition: all .3s;
+  display: flex; align-items: flex-start; gap: 12px; padding: 16px 20px;
+  border-radius: 16px; box-shadow: 0 16px 40px rgba(0,0,0,.18), 0 4px 12px rgba(0,0,0,.08);
+  font-size: 14px; font-weight: 500; min-width: 300px; max-width: 420px;
+  animation: toastIn .4s cubic-bezier(0.34,1.56,0.64,1);
+  transition: all .35s ease; position: relative; overflow: hidden;
+  pointer-events: all; backdrop-filter: blur(12px);
 }
-@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } }
-.toast.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
-.toast.error   { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
-.toast.warning { background: #fffbeb; border: 1px solid #fed7aa; color: #b45309; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(60px) scale(.9); } to { opacity:1; transform: translateX(0) scale(1); } }
+.toast-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+.toast-content { flex: 1; }
+.toast-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.toast-msg { font-size: 13px; opacity: .85; line-height: 1.4; }
+.toast-close { position: absolute; top: 10px; right: 12px; background: none; border: none; cursor: pointer; opacity: .5; font-size: 16px; transition: opacity .2s; }
+.toast-close:hover { opacity: 1; }
+.toast-bar { position: absolute; bottom: 0; left: 0; height: 3px; border-radius: 0 0 0 16px; animation: toastBar 3.5s linear forwards; }
+@keyframes toastBar { from { width: 100%; } to { width: 0%; } }
+.toast.success { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1.5px solid #86efac; color: #15803d; }
+.toast.success .toast-icon { background: #dcfce7; color: #16a34a; }
+.toast.success .toast-bar { background: #22c55e; }
+.toast.error { background: linear-gradient(135deg, #fff1f2, #ffe4e6); border: 1.5px solid #fca5a5; color: #b91c1c; }
+.toast.error .toast-icon { background: #fee2e2; color: #dc2626; }
+.toast.error .toast-bar { background: #ef4444; }
+.toast.warning { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1.5px solid #fcd34d; color: #92400e; }
+.toast.warning .toast-icon { background: #fef3c7; color: #d97706; }
+.toast.warning .toast-bar { background: #f59e0b; }
+.toast.info { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1.5px solid #93c5fd; color: #1d4ed8; }
+.toast.info .toast-icon { background: #dbeafe; color: #2563eb; }
+.toast.info .toast-bar { background: #3b82f6; }
+
+/* ── Delete Confirm Modal ── */
+.delete-confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(6px);
+  z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.delete-confirm-box {
+  background: #fff; border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 420px;
+  box-shadow: 0 32px 80px rgba(0,0,0,.25); text-align: center;
+  animation: modalIn .25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.delete-icon-wrap {
+  width: 72px; height: 72px; border-radius: 50%; background: #fff1f2;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+  border: 3px solid #fecaca; animation: pulse-danger 2s infinite;
+}
+@keyframes pulse-danger { 0%,100%{ box-shadow: 0 0 0 0 rgba(239,68,68,.3); } 50%{ box-shadow: 0 0 0 12px rgba(239,68,68,0); } }
+.delete-confirm-title { font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 10px; }
+.delete-confirm-desc { font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 28px; }
+.delete-confirm-item { font-weight: 700; color: #ef4444; }
+.delete-confirm-actions { display: flex; gap: 12px; }
+.delete-confirm-actions button { flex: 1; padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all .2s; font-family: inherit; }
+.btn-cancel-del { background: #f1f5f9; color: #64748b; border: 1.5px solid #e2e8f0 !important; }
+.btn-cancel-del:hover { background: #e2e8f0; }
+.btn-do-del { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+.btn-do-del:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,.4); }
+
+/* ── Landing Page ── */
+.landing-wrap {
+  min-height: 100vh; background: #0a0f1e; position: relative; overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+.landing-bg {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+}
+.landing-orb {
+  position: absolute; border-radius: 50%; filter: blur(120px); opacity: .25; animation: floatOrb 8s ease-in-out infinite alternate;
+}
+.landing-orb-1 { width: 600px; height: 600px; background: #6366f1; top: -200px; left: -100px; animation-delay: 0s; }
+.landing-orb-2 { width: 400px; height: 400px; background: #06b6d4; bottom: -100px; right: 10%; animation-delay: -3s; }
+.landing-orb-3 { width: 300px; height: 300px; background: #8b5cf6; top: 40%; right: -50px; animation-delay: -6s; }
+@keyframes floatOrb { from { transform: translate(0,0) scale(1); } to { transform: translate(30px, -20px) scale(1.05); } }
+.landing-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(99,102,241,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.landing-nav {
+  position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 60px; border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.landing-nav-logo { display: flex; align-items: center; gap: 12px; }
+.landing-nav-icon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, #6366f1, #06b6d4);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 24px rgba(99,102,241,.5);
+}
+.landing-nav-name { font-size: 20px; font-weight: 800; color: #fff; }
+.landing-nav-btn {
+  padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 700;
+  background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.15);
+  color: #fff; cursor: pointer; transition: all .2s; font-family: inherit;
+}
+.landing-nav-btn:hover { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.3); }
+.landing-hero {
+  position: relative; z-index: 10; text-align: center; padding: 100px 40px 80px;
+  max-width: 900px; margin: 0 auto;
+}
+.landing-badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px;
+  background: rgba(99,102,241,.15); border: 1px solid rgba(99,102,241,.3);
+  border-radius: 50px; margin-bottom: 32px; font-size: 13px; color: #a5b4fc;
+  font-weight: 600; letter-spacing: .3px;
+}
+.landing-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #818cf8; animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.landing-hero-title {
+  font-size: clamp(36px, 6vw, 72px); font-weight: 900; color: #fff; line-height: 1.1;
+  margin-bottom: 24px; letter-spacing: -1px;
+}
+.landing-hero-title .gradient-text {
+  background: linear-gradient(135deg, #818cf8, #06b6d4, #34d399);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.landing-hero-desc {
+  font-size: 18px; color: rgba(255,255,255,.6); line-height: 1.7;
+  max-width: 600px; margin: 0 auto 48px;
+}
+.landing-cta-group { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.landing-btn-primary {
+  padding: 16px 36px; border-radius: 12px; font-size: 16px; font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #fff; border: none; cursor: pointer; transition: all .25s;
+  font-family: inherit; box-shadow: 0 8px 32px rgba(99,102,241,.45);
+  display: flex; align-items: center; gap: 8px;
+}
+.landing-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(99,102,241,.55); }
+.landing-btn-secondary {
+  padding: 16px 36px; border-radius: 12px; font-size: 16px; font-weight: 600;
+  background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.85); cursor: pointer; transition: all .25s; font-family: inherit;
+}
+.landing-btn-secondary:hover { background: rgba(255,255,255,.14); }
+.landing-stats {
+  position: relative; z-index: 10; display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: rgba(255,255,255,.08); max-width: 900px; margin: 0 auto 80px;
+  border: 1px solid rgba(255,255,255,.08); border-radius: 20px; overflow: hidden;
+}
+.landing-stat {
+  padding: 32px 24px; text-align: center; background: rgba(255,255,255,.03);
+  transition: background .2s;
+}
+.landing-stat:hover { background: rgba(255,255,255,.06); }
+.landing-stat-val { font-size: 36px; font-weight: 900; color: #fff; margin-bottom: 6px; }
+.landing-stat-label { font-size: 13px; color: rgba(255,255,255,.45); font-weight: 500; }
+.landing-features {
+  position: relative; z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 20px; max-width: 1100px; margin: 0 auto 80px; padding: 0 40px;
+}
+.landing-feature {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px; padding: 32px 28px; transition: all .3s;
+}
+.landing-feature:hover { background: rgba(255,255,255,.07); border-color: rgba(99,102,241,.3); transform: translateY(-4px); }
+.landing-feature-icon {
+  width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px; font-size: 24px;
+}
+.landing-feature-icon.blue { background: rgba(99,102,241,.2); }
+.landing-feature-icon.cyan { background: rgba(6,182,212,.2); }
+.landing-feature-icon.green { background: rgba(16,185,129,.2); }
+.landing-feature-title { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+.landing-feature-desc { font-size: 14px; color: rgba(255,255,255,.5); line-height: 1.7; }
+.landing-footer {
+  position: relative; z-index: 10; text-align: center; padding: 32px;
+  border-top: 1px solid rgba(255,255,255,.06); color: rgba(255,255,255,.3); font-size: 13px;
+}
+
+/* ── Sewa Lapangan (Customer View) ── */
+.customer-header {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #06b6d4 100%);
+  border-radius: var(--radius); padding: 32px 28px; margin-bottom: 28px; position: relative; overflow: hidden;
+}
+.customer-header::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.customer-header-title { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 8px; position: relative; }
+.customer-header-sub { font-size: 14px; color: rgba(255,255,255,.75); position: relative; }
+.sewa-filter-bar {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 24px;
+  background: var(--card); padding: 16px 20px; border-radius: var(--radius);
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.sewa-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  overflow: hidden; box-shadow: var(--shadow); transition: all .25s ease;
+  display: flex; flex-direction: column;
+}
+.sewa-card:hover { transform: translateY(-6px); box-shadow: 0 20px 48px rgba(0,0,0,.12); border-color: var(--primary-light); }
+.sewa-card-img { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); position: relative; }
+.sewa-card-status {
+  position: absolute; top: 12px; left: 12px; padding: 5px 12px; border-radius: 20px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .3px;
+}
+.sewa-card-status.available { background: rgba(16,185,129,.9); color: #fff; }
+.sewa-card-status.busy { background: rgba(239,68,68,.9); color: #fff; }
+.sewa-card-sport-badge {
+  position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.9); display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+.sewa-card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+.sewa-card-venue { font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.sewa-card-name { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
+.sewa-card-info { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.sewa-card-info-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+.sewa-card-info-icon { width: 16px; text-align: center; }
+.sewa-card-divider { height: 1px; background: var(--border); margin: 14px 0; }
+.sewa-card-price { display: flex; align-items: baseline; gap: 6px; margin-bottom: 14px; }
+.sewa-card-price-from { font-size: 12px; color: var(--text-muted); }
+.sewa-card-price-val { font-size: 22px; font-weight: 900; color: var(--primary); }
+.sewa-card-price-unit { font-size: 12px; color: var(--text-muted); }
+.sewa-card-akreditasi { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+.sewa-card-akreditasi.A { background: #dcfce7; color: #15803d; }
+.sewa-card-akreditasi.B { background: #dbeafe; color: #1d4ed8; }
+.sewa-card-akreditasi.C { background: #fef3c7; color: #92400e; }
+.sewa-card-akreditasi.Unggul { background: #ede9fe; color: #6d28d9; }
+.sewa-card-footer { margin-top: auto; display: flex; gap: 8px; }
+.sewa-btn-book {
+  flex: 1; padding: 11px; border-radius: 10px; font-size: 13.5px; font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff; border: none; cursor: pointer; transition: all .2s; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.sewa-btn-book:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,.4); }
+.sewa-btn-detail {
+  padding: 11px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+  background: var(--bg); color: var(--text-muted); border: 1.5px solid var(--border);
+  cursor: pointer; transition: all .2s; font-family: inherit;
+}
+.sewa-btn-detail:hover { background: var(--border); color: var(--text); }
+
+/* ── Admin Lapangan Table View ── */
+.admin-lapangan-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+}
+.admin-lapangan-header-left h2 { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.admin-lapangan-header-left p { font-size: 13px; color: var(--text-muted); }
+.admin-search-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.lapangan-table-thumb { width: 52px; height: 40px; border-radius: 8px; object-fit: cover; background: #f1f5f9; border: 1.5px solid var(--border); }
+.lapangan-table-thumb-placeholder {
+  width: 52px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); font-size: 16px;
+}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.status-dot.active { background: #22c55e; }
+.status-dot.inactive { background: #ef4444; }
 
 /* ── Chart container ── */
 .chart-area { position: relative; height: 280px; }
@@ -428,44 +665,274 @@ tr:hover td { background: #fafbff; }
   .stats-grid { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
 }
+
+/* ── Premium Card Grid ── */
+.lapangan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 8px 0;
+}
+.premium-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.premium-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+.premium-card-img-wrap {
+  width: 100%;
+  height: 180px;
+  background: #f1f5f9;
+  position: relative;
+  overflow: hidden;
+}
+.premium-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.premium-card:hover .premium-card-img {
+  transform: scale(1.05);
+}
+.premium-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  color: var(--text-muted);
+}
+.premium-card-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.premium-card-venue {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+.premium-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.premium-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.premium-card-meta .star {
+  color: var(--warning);
+  font-size: 14px;
+}
+.premium-card-sport {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.premium-card-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 10px;
+}
+.premium-card-price-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.premium-card-price-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--primary);
+}
+.premium-card-price-unit {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Floating Actions in Card */
+.premium-card-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+.premium-btn-floating {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+.premium-btn-floating:hover {
+  background: #ffffff;
+  transform: scale(1.1);
+}
+.premium-btn-floating.delete:hover {
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.2);
+}
 </style>
 </head>
 <body>
 <div id="app" x-data="sportsApp()" x-init="init()">
 
-  <!-- ▓▓▓ TOAST NOTIFICATIONS ▓▓▓ -->
+  <!-- △△△ TOAST NOTIFICATIONS △△△ -->
   <div class="toast-container">
-    <template x-for="(t, i) in toasts" :key="i">
+    <template x-for="(t, i) in toasts" :key="t.id">
       <div class="toast" :class="t.type" x-show="t.visible" x-transition>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path x-show="t.type==='success'" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          <path x-show="t.type==='error'" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          <path x-show="t.type==='warning'" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-        </svg>
-        <span x-text="t.msg"></span>
+        <div class="toast-icon">
+          <template x-if="t.type==='success'"><span>✅</span></template>
+          <template x-if="t.type==='error'"><span>❌</span></template>
+          <template x-if="t.type==='warning'"><span>⚠️</span></template>
+          <template x-if="t.type==='info'"><span>ℹ️</span></template>
+        </div>
+        <div class="toast-content">
+          <div class="toast-title" x-text="t.type==='success'?'Berhasil':t.type==='error'?'Terjadi Kesalahan':t.type==='warning'?'Perhatian':'Informasi'"></div>
+          <div class="toast-msg" x-text="t.msg"></div>
+        </div>
+        <button class="toast-close" @click="t.visible=false">✕</button>
+        <div class="toast-bar"></div>
       </div>
     </template>
   </div>
 
-  <!-- ▓▓▓ LOGIN PAGE ▓▓▓ -->
-  <div class="login-wrap" x-show="!isAuth" x-transition>
+  <!-- △△△ DELETE CONFIRMATION MODAL △△△ -->
+  <div class="delete-confirm-overlay" x-show="deleteConfirm.show" x-transition @click.self="deleteConfirm.show=false">
+    <div class="delete-confirm-box">
+      <div class="delete-icon-wrap">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+        </svg>
+      </div>
+      <div class="delete-confirm-title">Konfirmasi Penghapusan</div>
+      <div class="delete-confirm-desc">
+        Anda akan menghapus <span class="delete-confirm-item" x-text="String.fromCharCode(34) + (deleteConfirm.name||'item ini') + String.fromCharCode(34)"></span>.<br>
+        Tindakan ini <strong>tidak dapat dibatalkan</strong> dan semua data terkait akan ikut terhapus.
+      </div>
+      <div class="delete-confirm-actions">
+        <button class="btn-cancel-del" @click="deleteConfirm.show=false">Batal</button>
+        <button class="btn-do-del" @click="deleteConfirm.onConfirm(); deleteConfirm.show=false">
+          🗑️ Hapus Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+    <!-- △△△ LANDING PAGE △△△ -->
+  <div class="landing-wrap" x-show="showLanding" x-transition>
+    <div class="landing-bg">
+      <div class="landing-grid"></div>
+      <div class="landing-orb landing-orb-1"></div>
+      <div class="landing-orb landing-orb-2"></div>
+      <div class="landing-orb landing-orb-3"></div>
+    </div>
+    <nav class="landing-nav">
+      <div class="landing-nav-logo">
+        <div class="landing-nav-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="landing-nav-name">SportSpace</div>
+      </div>
+      <button class="landing-nav-btn" @click="showLanding=false">Masuk ke Sistem →</button>
+    </nav>
+    <div class="landing-hero">
+      <div class="landing-badge">
+        <div class="landing-badge-dot"></div>
+        Platform Manajemen Lapangan Olahraga #1
+      </div>
+      <h1 class="landing-hero-title">
+        Kelola Lapangan Olahraga<br>
+        <span class="gradient-text">Lebih Cerdas &amp; Efisien</span>
+      </h1>
+      <p class="landing-hero-desc">
+        SportSpace adalah platform manajemen terintegrasi untuk mengoptimalkan operasional, reservasi, dan kualitas lapangan olahraga Anda dari satu dashboard terpadu.
+      </p>
+      <div class="landing-cta-group">
+        <button class="landing-btn-primary" @click="showLanding=false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Mulai Sekarang
+        </button>
+        <button class="landing-btn-secondary" @click="showLanding=false">Lihat Demo</button>
+      </div>
+    </div>
+    <div class="landing-stats">
+      <div class="landing-stat"><div class="landing-stat-val">500+</div><div class="landing-stat-label">Lapangan Terkelola</div></div>
+      <div class="landing-stat"><div class="landing-stat-val">50+</div><div class="landing-stat-label">Kota di Indonesia</div></div>
+      <div class="landing-stat"><div class="landing-stat-val">10K+</div><div class="landing-stat-label">Pengguna Aktif</div></div>
+      <div class="landing-stat"><div class="landing-stat-val">99.9%</div><div class="landing-stat-label">Uptime Sistem</div></div>
+    </div>
+    <div class="landing-features">
+      <div class="landing-feature">
+        <div class="landing-feature-icon blue">📊</div>
+        <div class="landing-feature-title">Dashboard Analitik Real-time</div>
+        <div class="landing-feature-desc">Pantau tingkat keterisian, pendapatan, dan performa lapangan secara real-time dengan grafik interaktif yang komprehensif.</div>
+      </div>
+      <div class="landing-feature">
+        <div class="landing-feature-icon cyan">🏙️</div>
+        <div class="landing-feature-title">Manajemen Multi-Cabang</div>
+        <div class="landing-feature-desc">Kelola puluhan cabang dan ratusan lapangan dari satu platform terpusat dengan sistem hierarki yang terstruktur rapi.</div>
+      </div>
+      <div class="landing-feature">
+        <div class="landing-feature-icon green">✅</div>
+        <div class="landing-feature-title">Audit Kualitas (QC)</div>
+        <div class="landing-feature-desc">Sistem evaluasi dan rekap kelayakan lapangan secara berkala dengan tim QC untuk memastikan standar kualitas terpenuhi.</div>
+      </div>
+    </div>
+    <div class="landing-footer">© 2026 SportSpace &middot; Platform Manajemen Lapangan Olahraga &middot; Dibuat dengan ❤️ untuk Indonesia</div>
+  </div>
+
+  <!-- △△△ LOGIN PAGE △△△ -->
+  <div class="login-wrap" x-show="!isAuth && !showLanding" x-transition>
     <div class="login-bg-orb" style="width:400px;height:400px;background:#6366f1;top:-100px;left:-100px;"></div>
     <div class="login-bg-orb" style="width:300px;height:300px;background:#06b6d4;bottom:-80px;right:-60px;"></div>
     <div class="login-bg-orb" style="width:200px;height:200px;background:#8b5cf6;top:40%;right:15%;"></div>
-
     <div class="login-card">
       <div class="login-logo">
         <div class="login-logo-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-          </svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
         </div>
         <div class="login-title">SportSpace</div>
         <div class="login-sub">Sistem Manajemen Sewa Lapangan Olahraga</div>
       </div>
-
       <div class="login-error" x-show="loginError" x-text="loginError" x-transition></div>
-
       <form @submit.prevent="doLogin">
         <div class="form-field">
           <label class="form-label">Username</label>
@@ -480,10 +947,10 @@ tr:hover td { background: #fafbff; }
           <span x-show="loginLoading">Memverifikasi...</span>
         </button>
       </form>
-
-      <p style="text-align:center;margin-top:24px;font-size:12px;color:rgba(255,255,255,.3);">
-        © 2026 SportSpace · Sistem Manajemen Lapangan
+      <p style="text-align:center;margin-top:16px;">
+        <button style="background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:12px;font-family:inherit;text-decoration:underline;" @click="showLanding=true">← Kembali ke Beranda</button>
       </p>
+      <p style="text-align:center;margin-top:8px;font-size:12px;color:rgba(255,255,255,.3);">© 2026 SportSpace &middot; Sistem Manajemen Lapangan</p>
     </div>
   </div>
 
@@ -506,19 +973,19 @@ tr:hover td { background: #fafbff; }
         <!-- Beranda -->
         <div class="sb-section">
           <div class="sb-section-label" x-show="!sidebarCollapsed">BERANDA</div>
-          <div class="sb-item" :class="{active: page==='dashboard'}" @click="page='dashboard'; loadDashboard()">
+          <div class="sb-item" :class="{active: page==='dashboard'}" @click="switchPage('dashboard')">
             <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             <span class="sb-item-label" x-show="!sidebarCollapsed">Dashboard</span>
           </div>
-          <div class="sb-item" :class="{active: page==='beranda'}" @click="page='beranda'">
+          <div class="sb-item" :class="{active: page==='beranda'}" @click="switchPage('beranda')">
             <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
             <span class="sb-item-label" x-show="!sidebarCollapsed">Sewa Lapangan</span>
           </div>
-          <div class="sb-item" :class="{active: page==='alamat'}" @click="page='alamat'">
+          <div class="sb-item" :class="{active: page==='alamat'}" @click="switchPage('alamat')">
             <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span class="sb-item-label" x-show="!sidebarCollapsed">Alamat</span>
           </div>
-          <div class="sb-item" :class="{active: page==='about'}" @click="page='about'">
+          <div class="sb-item" :class="{active: page==='about'}" @click="switchPage('about')">
             <svg class="sb-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
             <span class="sb-item-label" x-show="!sidebarCollapsed">About Us</span>
           </div>
@@ -712,8 +1179,12 @@ tr:hover td { background: #fafbff; }
             <div class="card-header">
               <div class="card-title">📊 Grafik Okupansi Keterisian Slot Lapangan</div>
               <button class="btn btn-sm btn-outline" @click="downloadChart">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Unduh Chart
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download
               </button>
             </div>
             <div class="card-body">
@@ -724,48 +1195,93 @@ tr:hover td { background: #fafbff; }
           </div>
         </div>
 
-        <!-- ══ BERANDA / SEWA LAPANGAN ══ -->
+        <!-- ══ BERANDA / SEWA LAPANGAN (Customer View) ══ -->
         <div x-show="page==='beranda'">
-          <div class="breadcrumb"><span>Sewa Lapangan</span></div>
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">🏟️ Daftar Lapangan Tersedia</div>
-              <button class="btn btn-primary btn-sm" @click="openModal('lap-add')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Tambah Lapangan
-              </button>
-            </div>
-            <div class="card-body">
-              <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
-                <template x-for="l in lookups.lapangan" :key="l.id">
-                  <div class="stat-card" style="cursor:default;display:flex;flex-direction:column;justify-content:between">
-                    <div style="width:100%;height:140px;border-radius:8px;overflow:hidden;margin-bottom:12px;background:#f1f5f9;display:flex;align-items:center;justify-content:center">
-                      <template x-if="l.foto">
-                        <img :src="l.foto" style="width:100%;height:100%;object-fit:cover">
-                      </template>
-                      <template x-if="!l.foto">
-                        <div class="stat-icon blue" style="width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center">
-                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
-                        </div>
-                      </template>
+          <div class="customer-header">
+            <div class="customer-header-title">🏙️ Temukan & Sewa Lapangan</div>
+            <div class="customer-header-sub">Pilih lapangan olahraga terbaik sesuai kebutuhan Anda. Tersedia berbagai jenis lapangan di seluruh Indonesia.</div>
+          </div>
+
+          <!-- Filter Bar -->
+          <div class="sewa-filter-bar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input class="field-input" style="flex:1;max-width:280px" placeholder="Cari nama lapangan..." x-model="sewaSearch">
+            <select class="field-select" style="max-width:180px" x-model="sewaFilterCabang">
+              <option value="">Semua Cabang</option>
+              <template x-for="c in lookups.cabang" :key="c.id">
+                <option :value="c.id" x-text="c.nama_cabang"></option>
+              </template>
+            </select>
+            <select class="field-select" style="max-width:180px" x-model="sewaFilterKategori">
+              <option value="">Semua Jenis</option>
+              <template x-for="k in lookups.kategori" :key="k.id">
+                <option :value="k.id" x-text="k.nama_kategori"></option>
+              </template>
+            </select>
+            <span style="font-size:13px;color:var(--text-muted);margin-left:auto" x-text="getFilteredLapangan().length + ' lapangan ditemukan'"></span>
+          </div>
+
+          <!-- Card Grid -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px">
+            <template x-for="l in getFilteredLapangan()" :key="l.id">
+              <div class="sewa-card">
+                <!-- Image -->
+                <div class="sewa-card-img" style="position:relative">
+                  <template x-if="l.foto">
+                    <img :src="l.foto" style="width:100%;height:200px;object-fit:cover" alt="Foto Lapangan">
+                  </template>
+                  <template x-if="!l.foto">
+                    <div style="width:100%;height:200px;background:linear-gradient(135deg,#e0e7ff,#c7d2fe);display:flex;align-items:center;justify-content:center;font-size:48px">
+                      <template x-if="l.kategori_lapangan && l.kategori_lapangan.nama_kategori.toLowerCase()==='futsal'"><span>⚽</span></template>
+                      <template x-if="l.kategori_lapangan && l.kategori_lapangan.nama_kategori.toLowerCase()==='badminton'"><span>🌸</span></template>
+                      <template x-if="!l.kategori_lapangan || (l.kategori_lapangan.nama_kategori.toLowerCase()!=='futsal' && l.kategori_lapangan.nama_kategori.toLowerCase()!=='badminton')"><span>🏠</span></template>
                     </div>
-                    <div style="font-size:15px;font-weight:700;margin-bottom:4px" x-text="l.nama_lapangan"></div>
-                    <div style="font-size:12px;color:var(--text-muted)" x-text="l.kode"></div>
-                    <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
-                      <span class="badge badge-info" x-text="l.kategori_lapangan ? l.kategori_lapangan.nama_kategori : '—'"></span>
-                      <span class="badge badge-purple" x-text="l.akreditasi"></span>
+                  </template>
+                  <!-- Status Badge -->
+                  <div class="sewa-card-status" :class="l.is_active ? 'available':'busy'" x-text="l.is_active ? 'Tersedia':'Tidak Aktif'"></div>
+                  <!-- Sport Badge -->
+                  <div class="sewa-card-sport-badge">
+                    <template x-if="l.kategori_lapangan && l.kategori_lapangan.nama_kategori.toLowerCase()==='futsal'"><span>⚽</span></template>
+                    <template x-if="l.kategori_lapangan && l.kategori_lapangan.nama_kategori.toLowerCase()==='badminton'"><span>🌸</span></template>
+                    <template x-if="!l.kategori_lapangan || (l.kategori_lapangan.nama_kategori.toLowerCase()!=='futsal' && l.kategori_lapangan.nama_kategori.toLowerCase()!=='badminton')"><span>🏡</span></template>
+                  </div>
+                </div>
+                <!-- Body -->
+                <div class="sewa-card-body">
+                  <div class="sewa-card-venue" x-text="(l.cabang ? l.cabang.nama_cabang : 'Cabang') + ' • ' + l.kode"></div>
+                  <div class="sewa-card-name" x-text="l.nama_lapangan"></div>
+                  <div class="sewa-card-info">
+                    <div class="sewa-card-info-row">
+                      <span class="sewa-card-info-icon">📍</span>
+                      <span x-text="l.cabang ? l.cabang.alamat || l.cabang.nama_cabang : 'Lokasi belum diatur'"></span>
                     </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);width:100%">
-                      <div style="font-size:12px;color:var(--text-muted)" x-text="l.cabang ? l.cabang.nama_cabang : ''"></div>
-                      <div class="action-btns" style="display:flex;gap:4px">
-                        <button class="btn-icon edit" @click.stop="editLapangan(l)" title="Edit">✏️</button>
-                        <button class="btn-icon delete" @click.stop="deleteLapangan(l.id)" title="Hapus">🗑️</button>
-                      </div>
+                    <div class="sewa-card-info-row">
+                      <span class="sewa-card-info-icon">🎾</span>
+                      <span x-text="l.kategori_lapangan ? l.kategori_lapangan.nama_kategori : 'Olahraga Umum'"></span>
+                    </div>
+                    <div class="sewa-card-info-row">
+                      <span class="sewa-card-info-icon">🏆</span>
+                      <span>Akreditasi <span class="sewa-card-akreditasi" :class="l.akreditasi" x-text="l.akreditasi"></span></span>
                     </div>
                   </div>
-                </template>
+                  <div class="sewa-card-divider"></div>
+                  <div class="sewa-card-price">
+                    <span class="sewa-card-price-from">Mulai dari</span>
+                    <span class="sewa-card-price-val" x-text="(() => { const ts = tarifList.filter(t => t.cabang_id === l.cabang_id); return ts.length > 0 ? 'Rp' + Math.min(...ts.map(t => parseFloat(t.nilai_tarif))).toLocaleString('id-ID') : 'Rp 100.000'; })()"></span>
+                    <span class="sewa-card-price-unit">/ sesi</span>
+                  </div>
+                  <div class="sewa-card-footer">
+                    <button class="sewa-btn-book" @click="toast('info', 'Fitur pemesanan akan segera tersedia!')">Pesan Sekarang</button>
+                    <button class="sewa-btn-detail" @click="toast('info', 'SK: ' + (l.nomor_sk || '-'))">Detail</button>
+                  </div>
+                </div>
               </div>
-            </div>
+            </template>
+          </div>
+
+          <div x-show="getFilteredLapangan().length===0" class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+            <p>Tidak ada lapangan yang cocok dengan filter</p>
           </div>
         </div>
 
@@ -973,7 +1489,7 @@ tr:hover td { background: #fafbff; }
               </div>
               <div class="modal-body">
                 <div class="field-group"><label class="field-label">Nama Hub *</label><input class="field-input" x-model="form.nama_hub" placeholder="Nama hub pusat olahraga"></div>
-                <div class="field-group"><label class="field-label">Deskripsi</label><textarea class="field-textarea" x-model="form.deskripsi" placeholder="Deskripsi singkat hub..."></textarea></div>
+                <div class="field-group"><label class="field-label">Deskripsi</label><textarea class="field-textarea" x-model="form.deskripsi" placeholder="Deskripsi hub"></textarea></div>
               </div>
               <div class="modal-footer">
                 <button class="btn btn-secondary" @click="modal=''">Batal</button>
@@ -983,110 +1499,98 @@ tr:hover td { background: #fafbff; }
           </div>
         </div>
 
-        <!-- ══ DATA LAPANGAN ══ -->
+        <!-- ══ DATA LAPANGAN (Admin Table View) ══ -->
         <div x-show="page==='lapangan'">
-          <div class="breadcrumb"><span>Data Detail Lapangan</span></div>
+          <div class="breadcrumb"><span>Data Lapangan</span></div>
+
           <div class="card">
-            <div class="card-header">
-              <div class="card-title">🏟️ Daftar Lapangan</div>
-              <button class="btn btn-primary btn-sm" @click="openModal('lap-add')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Tambah Lapangan
-              </button>
+            <!-- Admin Header -->
+            <div style="padding:24px 24px 0">
+              <div class="admin-lapangan-header">
+                <div class="admin-lapangan-header-left">
+                  <h2>Data Master Lapangan</h2>
+                  <p>Kelola data lapangan, akreditasi, legalitas dan foto dokumentasi</p>
+                </div>
+                <div class="admin-search-group">
+                  <input class="field-input" style="width:220px" placeholder="🔍 Cari lapangan..." x-model="lapanganSearch">
+                  <button class="btn btn-primary" @click="openModal('lap-add')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Tambah Lapangan
+                  </button>
+                </div>
+              </div>
             </div>
+
+            <!-- Table -->
             <div class="table-wrap">
               <table>
-                <thead><tr><th>No</th><th>Kode</th><th>Nama Lapangan</th><th>Kategori</th><th>Hub</th><th>Akreditasi</th><th>Cabang</th><th>Aksi</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th style="width:50px">No</th>
+                    <th style="width:70px">Foto</th>
+                    <th>Kode</th>
+                    <th>Nama Lapangan</th>
+                    <th>Kategori</th>
+                    <th>Cabang</th>
+                    <th>Akreditasi</th>
+                    <th>Status</th>
+                    <th style="width:100px">Aksi</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  <template x-for="(l,i) in lapanganList" :key="l.id">
+                  <template x-for="(l, i) in getFilteredAdminLapangan()" :key="l.id">
                     <tr>
-                      <td x-text="i+1"></td>
-                      <td><code style="font-size:12px;background:#f1f5f9;padding:2px 6px;border-radius:4px" x-text="l.kode"></code></td>
-                      <td><strong x-text="l.nama_lapangan"></strong></td>
-                      <td><span class="badge badge-info" x-text="l.kategori_lapangan ? l.kategori_lapangan.nama_kategori : '—'"></span></td>
-                      <td x-text="l.hub_pusat ? l.hub_pusat.nama_hub : '—'"></td>
-                      <td><span class="badge badge-purple" x-text="l.akreditasi"></span></td>
-                      <td x-text="l.cabang ? l.cabang.nama_cabang : '—'"></td>
-                      <td><div class="action-btns">
-                        <button class="btn-icon edit" @click="editLapangan(l)">✏️</button>
-                        <button class="btn-icon delete" @click="deleteLapangan(l.id)">🗑️</button>
-                      </div></td>
+                      <td x-text="i+1" style="font-weight:600;color:var(--text-muted)"></td>
+                      <td>
+                        <template x-if="l.foto">
+                          <img :src="l.foto" class="lapangan-table-thumb" alt="foto">
+                        </template>
+                        <template x-if="!l.foto">
+                          <div class="lapangan-table-thumb-placeholder">
+                            <template x-if="l.kategori_lapangan && l.kategori_lapangan.nama_kategori.toLowerCase()==='futsal'"><span>⚽</span></template>
+                            <template x-if="l.kategori_lapangan && l.kategori_lapangan.nama_kategori.toLowerCase()==='badminton'"><span>🌸</span></template>
+                            <template x-if="!l.kategori_lapangan || (l.kategori_lapangan.nama_kategori.toLowerCase()!=='futsal'&&l.kategori_lapangan.nama_kategori.toLowerCase()!=='badminton')"><span>🏠</span></template>
+                          </div>
+                        </template>
+                      </td>
+                      <td><code style="background:#f1f5f9;padding:3px 8px;border-radius:6px;font-size:12px;color:var(--primary)" x-text="l.kode"></code></td>
+                      <td>
+                        <div style="font-weight:700;font-size:14px" x-text="l.nama_lapangan"></div>
+                        <div style="font-size:12px;color:var(--text-muted)" x-text="l.nomor_sk ? 'SK: ' + l.nomor_sk : ''"></div>
+                      </td>
+                      <td>
+                        <span style="display:inline-flex;align-items:center;gap:4px;font-size:13px">
+                          <template x-if="l.kategori_lapangan && l.kategori_lapangan.nama_kategori.toLowerCase()==='futsal'"><span>⚽</span></template>
+                          <template x-if="l.kategori_lapangan && l.kategori_lapangan.nama_kategori.toLowerCase()==='badminton'"><span>🌸</span></template>
+                          <template x-if="!l.kategori_lapangan || (l.kategori_lapangan.nama_kategori.toLowerCase()!=='futsal'&&l.kategori_lapangan.nama_kategori.toLowerCase()!=='badminton')"><span>🏠</span></template>
+                          <span x-text="l.kategori_lapangan ? l.kategori_lapangan.nama_kategori : '—'"></span>
+                        </span>
+                      </td>
+                      <td>
+                        <div style="font-size:13px;font-weight:600" x-text="l.cabang ? l.cabang.nama_cabang : '—'"></div>
+                      </td>
+                      <td>
+                        <span class="badge" :class="l.akreditasi==='A'?'badge-success':l.akreditasi==='Unggul'?'badge-info':l.akreditasi==='B'?'badge-warning':'badge-danger'" x-text="l.akreditasi"></span>
+                      </td>
+                      <td>
+                        <span style="display:flex;align-items:center;font-size:13px">
+                          <span class="status-dot" :class="l.is_active ? 'active':'inactive'"></span>
+                          <span x-text="l.is_active ? 'Aktif':'Non-aktif'" :style="l.is_active?'color:#15803d':'color:#b91c1c'"></span>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="action-btns">
+                          <button class="btn-icon edit" @click="editLapangan(l)" title="Edit Data">✏️</button>
+                          <button class="btn-icon delete" @click="confirmDeleteLapangan(l)" title="Hapus Data">🗑️</button>
+                        </div>
+                      </td>
                     </tr>
                   </template>
-                  <tr x-show="lapanganList.length===0"><td colspan="8" class="empty-state"><p>Belum ada data lapangan</p></td></tr>
+                  <tr x-show="getFilteredAdminLapangan().length===0">
+                    <td colspan="9" class="empty-state"><p>Belum ada data lapangan</p></td>
+                  </tr>
                 </tbody>
               </table>
-            </div>
-          </div>
-
-          <div class="modal-overlay" x-show="modal==='lap-add'||modal==='lap-edit'" @click.self="modal=''">
-            <div class="modal modal-lg">
-              <div class="modal-header">
-                <div class="modal-title" x-text="modal==='lap-add'?'Tambah Data Lapangan':'Edit Data Lapangan'"></div>
-                <button class="modal-close" @click="modal=''">✕</button>
-              </div>
-              <div class="modal-body">
-                <div class="form-row">
-                  <div class="field-group">
-                    <label class="field-label">Hub Pusat *</label>
-                    <select class="field-select" x-model="form.hub_pusat_id">
-                      <option value="">-- Pilih Hub --</option>
-                      <template x-for="h in lookups.hub" :key="h.id"><option :value="h.id" x-text="h.nama_hub"></option></template>
-                    </select>
-                  </div>
-                  <div class="field-group">
-                    <label class="field-label">Cabang *</label>
-                    <select class="field-select" x-model="form.cabang_id">
-                      <option value="">-- Pilih Cabang --</option>
-                      <template x-for="c in lookups.cabang" :key="c.id"><option :value="c.id" x-text="c.nama_cabang"></option></template>
-                    </select>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="field-group"><label class="field-label">Kode *</label><input class="field-input" x-model="form.kode" placeholder="LAP-BDM-01"></div>
-                  <div class="field-group"><label class="field-label">Nama Lapangan *</label><input class="field-input" x-model="form.nama_lapangan" placeholder="Nama lengkap lapangan"></div>
-                </div>
-                <div class="form-row">
-                  <div class="field-group">
-                    <label class="field-label">Kategori / Jenjang *</label>
-                    <select class="field-select" x-model="form.kategori_lapangan_id">
-                      <option value="">-- Pilih Kategori --</option>
-                      <template x-for="k in lookups.kategori" :key="k.id"><option :value="k.id" x-text="k.nama_kategori"></option></template>
-                    </select>
-                  </div>
-                  <div class="field-group">
-                    <label class="field-label">Akreditasi Kualitas *</label>
-                    <select class="field-select" x-model="form.akreditasi">
-                      <option value="">-- Pilih --</option>
-                      <option>A</option><option>B</option><option>C</option><option>Unggul</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="field-group"><label class="field-label">Nomor SK / Izin *</label><input class="field-input" x-model="form.nomor_sk" placeholder="SK/LAP/2026/001"></div>
-                  <div class="field-group"><label class="field-label">Tanggal Sertifikasi *</label><input class="field-input" type="date" x-model="form.tanggal_sertifikasi"></div>
-                </div>
-                <div class="field-group"><label class="field-label">Alamat</label><textarea class="field-textarea" x-model="form.alamat" placeholder="Alamat lengkap lapangan"></textarea></div>
-                <div class="field-group">
-                  <label class="field-label">Dokumen Legalitas (PDF, maks 2MB)</label>
-                  <input class="field-file" type="file" accept=".pdf" @change="form.dokumen_legalitas = $event.target.files[0]">
-                  <div class="field-hint">Hanya file PDF dengan ukuran maksimal 2MB</div>
-                </div>
-                <div class="field-group" style="margin-top:12px">
-                  <label class="field-label">Foto Lapangan (JPG, PNG, WebP, maks 2MB)</label>
-                  <input class="field-file" type="file" accept="image/*" @change="form.foto = $event.target.files[0]; if(form.foto) { const reader = new FileReader(); reader.onload = (e) => form.foto_preview = e.target.result; reader.readAsDataURL(form.foto); } else { form.foto_preview = null; }">
-                  <div class="field-hint">Format gambar (JPG, PNG, WebP) dengan ukuran maksimal 2MB</div>
-                  <template x-if="form.foto_preview">
-                    <div style="margin-top:8px">
-                      <img :src="form.foto_preview" style="max-height:100px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">
-                    </div>
-                  </template>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" @click="modal=''">Batal</button>
-                <button class="btn btn-primary" @click="saveLapangan">Simpan</button>
-              </div>
             </div>
           </div>
         </div>
@@ -1114,6 +1618,7 @@ tr:hover td { background: #fafbff; }
                       <td x-text="s.lapangan ? s.lapangan.nama_lapangan : '—'"></td>
                       <td x-text="s.alamat||'—'"></td>
                       <td><div class="action-btns">
+                        <button class="btn-icon edit" @click="editSarana(s)">✏️</button>
                         <button class="btn-icon delete" @click="deleteSarana(s.id)">🗑️</button>
                       </div></td>
                     </tr>
@@ -1124,10 +1629,10 @@ tr:hover td { background: #fafbff; }
             </div>
           </div>
 
-          <div class="modal-overlay" x-show="modal==='sarana-add'" @click.self="modal=''">
+          <div class="modal-overlay" x-show="modal==='sarana-add' || modal==='sarana-edit'" @click.self="modal=''">
             <div class="modal">
               <div class="modal-header">
-                <div class="modal-title">Tambah Sarana Fasilitas</div>
+                <div class="modal-title" x-text="editingId ? 'Edit Sarana Fasilitas' : 'Tambah Sarana Fasilitas'"></div>
                 <button class="modal-close" @click="modal=''">✕</button>
               </div>
               <div class="modal-body">
@@ -1296,7 +1801,7 @@ tr:hover td { background: #fafbff; }
                       <tr>
                         <td x-text="i+1"></td>
                         <td><strong x-text="'Rp ' + Number(t.nilai_tarif).toLocaleString('id-ID')"></strong></td>
-                        <td><span class="badge" :class="t.deskripsi_skema_jam.includes('Pagi')?'badge-warning':'badge-info'" x-text="t.deskripsi_skema_jam"></span></td>
+                        <td><span class="badge" :class="(t.deskripsi_skema_jam && t.deskripsi_skema_jam.includes('Pagi')) ? 'badge-warning' : 'badge-info'" x-text="t.deskripsi_skema_jam || '—'"></span></td>
                         <td x-text="t.periode"></td>
                         <td x-text="t.lokasi_lapangan"></td>
                         <td x-text="t.cabang ? t.cabang.nama_cabang : '—'"></td>
@@ -1530,13 +2035,14 @@ tr:hover td { background: #fafbff; }
                   <th @click="sortTarget('realisasi_jam')">Realisasi <span class="sort-icon">⇅</span></th>
                   <th>Okupansi</th>
                   <th>Status</th>
+                  <th>Aksi</th>
                 </tr></thead>
                 <tbody>
                   <template x-for="(t,i) in targetList" :key="t.id">
                     <tr>
                       <td x-text="i+1"></td>
                       <td x-text="t.lapangan ? t.lapangan.nama_lapangan : '—'"></td>
-                      <td x-text="['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][t.bulan] + ' ' + t.tahun"></td>
+                      <td x-text="(t.bulan && ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][t.bulan] || '—') + ' ' + t.tahun"></td>
                       <td x-text="t.target_jam + ' jam'"></td>
                       <td x-text="(t.realisasi_jam||0) + ' jam'"></td>
                       <td style="min-width:120px">
@@ -1552,17 +2058,23 @@ tr:hover td { background: #fafbff; }
                           x-text="((t.realisasi_jam||0)/t.target_jam)>=.8?'Tercapai':((t.realisasi_jam||0)/t.target_jam)>=.5?'Sebagian':'Di Bawah Target'">
                         </span>
                       </td>
+                      <td>
+                        <div class="action-btns">
+                          <button class="btn-icon edit" @click="editTarget(t)">✏️</button>
+                          <button class="btn-icon delete" @click="deleteTarget(t.id)">🗑️</button>
+                        </div>
+                      </td>
                     </tr>
                   </template>
-                  <tr x-show="targetList.length===0"><td colspan="7" class="empty-state"><p>Belum ada data target</p></td></tr>
+                  <tr x-show="targetList.length===0"><td colspan="8" class="empty-state"><p>Belum ada data target</p></td></tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div class="modal-overlay" x-show="modal==='target-add'" @click.self="modal=''">
+          <div class="modal-overlay" x-show="modal==='target-add' || modal==='target-edit'" @click.self="modal=''">
             <div class="modal">
-              <div class="modal-header"><div class="modal-title">Tambah Target Keterisian</div><button class="modal-close" @click="modal=''">✕</button></div>
+              <div class="modal-header"><div class="modal-title" x-text="editingId ? 'Edit Target Keterisian' : 'Tambah Target Keterisian'"></div><button class="modal-close" @click="modal=''">✕</button></div>
               <div class="modal-body">
                 <div class="field-group">
                   <label class="field-label">Lapangan *</label>
@@ -1618,7 +2130,12 @@ tr:hover td { background: #fafbff; }
                       <td><span class="badge" :class="s.jenis_kelamin==='L'?'badge-info':'badge-purple'" x-text="s.jenis_kelamin==='L'?'Laki-laki':'Perempuan'"></span></td>
                       <td x-text="s.cabang ? s.cabang.nama_cabang : '—'"></td>
                       <td x-text="s.lapangan ? s.lapangan.nama_lapangan : '—'"></td>
-                      <td><button class="btn-icon delete" @click="deleteStafQC(s.id)">🗑️</button></td>
+                      <td>
+                        <div class="action-btns">
+                          <button class="btn-icon edit" @click="editStafQC(s)">✏️</button>
+                          <button class="btn-icon delete" @click="deleteStafQC(s.id)">🗑️</button>
+                        </div>
+                      </td>
                     </tr>
                   </template>
                   <tr x-show="stafQCList.length===0"><td colspan="9" class="empty-state"><p>Belum ada staf QC</p></td></tr>
@@ -1627,9 +2144,9 @@ tr:hover td { background: #fafbff; }
             </div>
           </div>
 
-          <div class="modal-overlay" x-show="modal==='qc-add'" @click.self="modal=''">
+          <div class="modal-overlay" x-show="modal==='qc-add' || modal==='qc-edit'" @click.self="modal=''">
             <div class="modal modal-lg">
-              <div class="modal-header"><div class="modal-title">Tambah Staf QC</div><button class="modal-close" @click="modal=''">✕</button></div>
+              <div class="modal-header"><div class="modal-title" x-text="editingId ? 'Edit Staf QC' : 'Tambah Staf QC'"></div><button class="modal-close" @click="modal=''">✕</button></div>
               <div class="modal-body">
                 <div class="form-row">
                   <div class="field-group"><label class="field-label">NIK / Nomor Induk *</label><input class="field-input" x-model="form.nik" placeholder="QC-3174-001"></div>
@@ -1740,6 +2257,7 @@ tr:hover td { background: #fafbff; }
                   <th @click="sortRekap('nilai_tim_qc')">Nilai Tim QC <span class="sort-icon">⇅</span></th>
                   <th @click="sortRekap('grade')">Grade <span class="sort-icon">⇅</span></th>
                   <th>Status Kelayakan</th>
+                  <th>Aksi</th>
                 </tr></thead>
                 <tbody>
                   <template x-for="(r,i) in rekapList" :key="r.id">
@@ -1765,11 +2283,17 @@ tr:hover td { background: #fafbff; }
                       </td>
                       <td><span class="badge" :class="r.grade==='A'?'badge-success':r.grade==='B'?'badge-info':r.grade==='C'?'badge-warning':'badge-danger'" x-text="r.grade"></span></td>
                       <td>
-                        <div class="stars" x-text="'★'.repeat(r.bintang||0) + '☆'.repeat(5-(r.bintang||0))"></div>
+                        <div class="stars" x-text="'★'.repeat(Math.max(0, Math.min(5, Math.floor(r.bintang||0)))) + '☆'.repeat(Math.max(0, 5 - Math.max(0, Math.min(5, Math.floor(r.bintang||0)))))"></div>
+                      </td>
+                      <td>
+                        <div class="action-btns">
+                          <button class="btn-icon edit" @click="editRekap(r)">✏️</button>
+                          <button class="btn-icon delete" @click="deleteRekap(r.id)">🗑️</button>
+                        </div>
                       </td>
                     </tr>
                   </template>
-                  <tr x-show="rekapList.length===0"><td colspan="7" class="empty-state"><p>Belum ada rekap kelayakan</p></td></tr>
+                  <tr x-show="rekapList.length===0"><td colspan="8" class="empty-state"><p>Belum ada rekap kelayakan</p></td></tr>
                 </tbody>
               </table>
             </div>
@@ -1786,9 +2310,9 @@ tr:hover td { background: #fafbff; }
             </div>
           </div>
 
-          <div class="modal-overlay" x-show="modal==='rekap-add'" @click.self="modal=''">
+          <div class="modal-overlay" x-show="modal==='rekap-add' || modal==='rekap-edit'" @click.self="modal=''">
             <div class="modal">
-              <div class="modal-header"><div class="modal-title">Tambah Rekap Kelayakan</div><button class="modal-close" @click="modal=''">✕</button></div>
+              <div class="modal-header"><div class="modal-title" x-text="editingId ? 'Edit Rekap Kelayakan' : 'Tambah Rekap Kelayakan'"></div><button class="modal-close" @click="modal=''">✕</button></div>
               <div class="modal-body">
                 <div class="field-group">
                   <label class="field-label">Lapangan *</label>
@@ -1992,6 +2516,77 @@ tr:hover td { background: #fafbff; }
           </div>
         </div>
 
+      <div class="modal-overlay" x-show="modal==='lap-add'||modal==='lap-edit'" @click.self="modal=''">
+        <div class="modal modal-lg">
+          <div class="modal-header">
+            <div class="modal-title" x-text="modal==='lap-add'?'Tambah Data Lapangan':'Edit Data Lapangan'"></div>
+            <button class="modal-close" @click="modal=''">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-row">
+              <div class="field-group">
+                <label class="field-label">Hub Pusat *</label>
+                <select class="field-select" x-model="form.hub_pusat_id">
+                  <option value="">-- Pilih Hub --</option>
+                  <template x-for="h in lookups.hub" :key="h.id"><option :value="h.id" x-text="h.nama_hub"></option></template>
+                </select>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Cabang *</label>
+                <select class="field-select" x-model="form.cabang_id">
+                  <option value="">-- Pilih Cabang --</option>
+                  <template x-for="c in lookups.cabang" :key="c.id"><option :value="c.id" x-text="c.nama_cabang"></option></template>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field-group"><label class="field-label">Kode *</label><input class="field-input" x-model="form.kode" placeholder="LAP-BDM-01"></div>
+              <div class="field-group"><label class="field-label">Nama Lapangan *</label><input class="field-input" x-model="form.nama_lapangan" placeholder="Nama lengkap lapangan"></div>
+            </div>
+            <div class="form-row">
+              <div class="field-group">
+                <label class="field-label">Kategori / Jenjang *</label>
+                <select class="field-select" x-model="form.kategori_lapangan_id">
+                  <option value="">-- Pilih Kategori --</option>
+                  <template x-for="k in lookups.kategori" :key="k.id"><option :value="k.id" x-text="k.nama_kategori"></option></template>
+                </select>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Akreditasi Kualitas *</label>
+                <select class="field-select" x-model="form.akreditasi">
+                  <option value="">-- Pilih --</option>
+                  <option>A</option><option>B</option><option>C</option><option>Unggul</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field-group"><label class="field-label">Nomor SK / Izin *</label><input class="field-input" x-model="form.nomor_sk" placeholder="SK/LAP/2026/001"></div>
+              <div class="field-group"><label class="field-label">Tanggal Sertifikasi *</label><input class="field-input" type="date" x-model="form.tanggal_sertifikasi"></div>
+            </div>
+            <div class="field-group"><label class="field-label">Alamat</label><textarea class="field-textarea" x-model="form.alamat" placeholder="Alamat lengkap lapangan"></textarea></div>
+            <div class="field-group">
+              <label class="field-label">Dokumen Legalitas (PDF, maks 2MB)</label>
+              <input class="field-file" type="file" accept=".pdf" @change="form.dokumen_legalitas = $event.target.files[0]">
+              <div class="field-hint">Hanya file PDF dengan ukuran maksimal 2MB</div>
+            </div>
+            <div class="field-group" style="margin-top:12px">
+              <label class="field-label">Foto Lapangan (JPG, PNG, WebP, maks 2MB)</label>
+              <input class="field-file" type="file" accept="image/*" @change="handleFotoUpload($event)">
+              <div class="field-hint">Format gambar (JPG, PNG, WebP) dengan ukuran maksimal 2MB</div>
+              <template x-if="form.foto_preview">
+                <div style="margin-top:8px">
+                  <img :src="form.foto_preview" style="max-height:100px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">
+                </div>
+              </template>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="modal=''">Batal</button>
+            <button class="btn btn-primary" @click="saveLapangan">Simpan</button>
+          </div>
+        </div>
+      </div>
+
       </div><!-- end page-content -->
     </div><!-- end main-wrap -->
   </div><!-- end app-wrap -->
@@ -2011,9 +2606,17 @@ function sportsApp() {
     page: 'dashboard',
     pageTitle: 'Dashboard',
     sidebarCollapsed: false,
+    showLanding: !sessionStorage.getItem('sportspace_user'),
     modal: '',
     form: {},
     toasts: [],
+    deleteConfirm: { show: false, name: '', onConfirm: () => {} },
+
+    // ── Search & Filter State ─────────────────────────────────────────────
+    sewaSearch: '',
+    sewaFilterCabang: '',
+    sewaFilterKategori: '',
+    lapanganSearch: '',
 
     // ── Data Lists ────────────────────────────────────────────────────────
     dashStats: {},
@@ -2052,7 +2655,7 @@ function sportsApp() {
     async doLogin() {
       this.loginLoading = true; this.loginError = '';
       try {
-        const r = await fetch('/api/login', {
+        const r = await fetch(window.location.origin + '/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
           body: JSON.stringify(this.loginForm)
@@ -2073,7 +2676,7 @@ function sportsApp() {
     },
 
     async doLogout() {
-      await fetch('/api/logout', { method:'POST', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'} });
+      await fetch(window.location.origin + '/api/logout', { method:'POST', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'} });
       sessionStorage.removeItem('sportspace_user');
       this.isAuth = false; this.currentUser = null;
       this.loginForm = { username:'', password:'' };
@@ -2081,15 +2684,30 @@ function sportsApp() {
 
     // ── Lookups ───────────────────────────────────────────────────────────
     async loadLookups() {
-      const [cabang, kategori, hub, lapangan, roles, member_groups] = await Promise.all([
-        fetch('/api/lookup/cabang').then(r=>r.json()),
-        fetch('/api/lookup/kategori').then(r=>r.json()),
-        fetch('/api/lookup/hub').then(r=>r.json()),
-        fetch('/api/lookup/lapangan').then(r=>r.json()),
-        fetch('/api/lookup/roles').then(r=>r.json()),
-        fetch('/api/lookup/member-groups').then(r=>r.json()),
-      ]);
-      this.lookups = { cabang, kategori, hub, lapangan, roles, member_groups };
+      try {
+        const bUrl = window.location.origin;
+        const [cabang, kategori, hub, lapangan, roles, member_groups] = await Promise.all([
+          fetch(bUrl + '/api/lookup/cabang').then(r=>r.ok ? r.json() : []),
+          fetch(bUrl + '/api/lookup/kategori').then(r=>r.ok ? r.json() : []),
+          fetch(bUrl + '/api/lookup/hub').then(r=>r.ok ? r.json() : []),
+          fetch(bUrl + '/api/lookup/lapangan').then(r=>r.ok ? r.json() : []),
+          fetch(bUrl + '/api/lookup/roles').then(r=>r.ok ? r.json() : []),
+          fetch(bUrl + '/api/lookup/member-groups').then(r=>r.ok ? r.json() : []),
+        ]).catch(e => {
+          console.error('Error fetching lookups:', e);
+          return [[], [], [], [], [], []];
+        });
+        this.lookups = {
+          cabang: Array.isArray(cabang) ? cabang : [],
+          kategori: Array.isArray(kategori) ? kategori : [],
+          hub: Array.isArray(hub) ? hub : [],
+          lapangan: Array.isArray(lapangan) ? lapangan : [],
+          roles: Array.isArray(roles) ? roles : [],
+          member_groups: Array.isArray(member_groups) ? member_groups : []
+        };
+      } catch (e) {
+        console.error('loadLookups failed:', e);
+      }
     },
 
     // ── Page switch ───────────────────────────────────────────────────────
@@ -2109,23 +2727,30 @@ function sportsApp() {
       this.pageTitle = this.pageTitles[p] || p;
       this.modal = '';
       this.form = {};
+      this.editingId = null;
       const loaders = {
+        'dashboard': this.loadDashboard,
         'musim': this.loadMusim, 'mitra': this.loadMitra, 'hub': this.loadHub,
         'lapangan': this.loadLapangan, 'sarana': this.loadSarana,
         'dokumen': this.loadDokumen, 'tarif': ()=>{ this.loadTarif(); this.loadStandar(); },
         'slot': this.loadSlot, 'target': this.loadTarget, 'staf-qc': this.loadStafQC,
         'temuan': this.loadTemuan, 'rekap': this.loadRekap,
         'users-member': this.loadMembers, 'users-staff': this.loadStaff,
-        'beranda': this.loadLookups, 'alamat': this.loadLookups
+        'beranda': async () => { await this.loadLookups(); await this.loadLapangan(); },
+        'alamat': this.loadLookups
       };
       if (loaders[p]) await loaders[p].call(this);
     },
 
     // ── Toast ─────────────────────────────────────────────────────────────
     toast(type, msg) {
-      const t = { type, msg, visible: true };
-      this.toasts.push(t);
-      setTimeout(()=>{ t.visible = false; setTimeout(()=>{ this.toasts = this.toasts.filter(x=>x!==t); }, 300); }, 3500);
+      const id = Date.now() + Math.random();
+      this.toasts.push({ id, type, msg, visible: true });
+      setTimeout(() => { 
+        const index = this.toasts.findIndex(x => x.id === id);
+        if (index > -1) this.toasts[index].visible = false;
+        setTimeout(() => { this.toasts = this.toasts.filter(x => x.id !== id); }, 300); 
+      }, 3500);
     },
 
     openModal(name) {
@@ -2155,20 +2780,44 @@ function sportsApp() {
       }
     },
 
+    handleFotoUpload(event) {
+      const file = event.target.files[0];
+      this.form.foto = file;
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.form.foto_preview = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        this.form.foto_preview = null;
+      }
+    },
+
     // ── API helper ────────────────────────────────────────────────────────
     async api(method, url, body = null, isFormData = false) {
-      const opts = {
-        method,
-        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-      };
-      if (body && !isFormData) {
-        opts.headers['Content-Type'] = 'application/json';
-        opts.body = JSON.stringify(body);
-      } else if (body && isFormData) {
-        opts.body = body;
+      try {
+        const opts = {
+          method,
+          headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+        };
+        if (body && !isFormData) {
+          opts.headers['Content-Type'] = 'application/json';
+          opts.body = JSON.stringify(body);
+        } else if (body && isFormData) {
+          opts.body = body;
+        }
+        const fullUrl = url.startsWith('http') ? url : (window.location.origin + (url.startsWith('/') ? '' : '/') + url);
+        const r = await fetch(fullUrl, opts);
+        if (!r.ok) {
+          const errData = await r.json().catch(() => ({}));
+          return { success: false, message: errData.message || `HTTP error! status: ${r.status}` };
+        }
+        return await r.json();
+      } catch (e) {
+        console.error('API Error:', e);
+        return { success: false, message: 'Gagal menghubungi server: ' + e.message };
       }
-      const r = await fetch(url, opts);
-      return r.json();
     },
 
     // ════════════════════════════════════════════════════════════════════
@@ -2177,9 +2826,11 @@ function sportsApp() {
     async loadDashboard() {
       const params = new URLSearchParams(this.dashFilter).toString();
       const d = await this.api('GET', '/api/dashboard?' + params);
-      if (d.success) {
-        this.dashStats = d.stats;
+      if (d && d.success) {
+        this.dashStats = d.stats || {};
         this.$nextTick(() => this.renderChart(d.chart_data || []));
+      } else {
+        this.toast('error', (d && d.message) || 'Gagal memuat data dashboard');
       }
     },
 
@@ -2226,7 +2877,7 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     // MUSIM OPERASIONAL
     // ════════════════════════════════════════════════════════════════════
-    async loadMusim() { const d = await this.api('GET','/api/musim'); if(d.success) this.musimList=d.data; },
+    async loadMusim() { const d = await this.api('GET','/api/musim'); if(d && d.success) this.musimList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data musim'); },
     async saveMusim() {
       const url = this.editingId ? `/api/musim/${this.editingId}` : '/api/musim';
       const method = this.editingId ? 'PUT' : 'POST';
@@ -2245,7 +2896,7 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     // MITRA WILAYAH
     // ════════════════════════════════════════════════════════════════════
-    async loadMitra() { const d = await this.api('GET','/api/mitra'); if(d.success) this.mitraList=d.data; },
+    async loadMitra() { const d = await this.api('GET','/api/mitra'); if(d && d.success) this.mitraList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data mitra'); },
     async saveMitra() {
       const url = this.editingId ? `/api/mitra/${this.editingId}` : '/api/mitra';
       const method = this.editingId ? 'PUT' : 'POST';
@@ -2264,7 +2915,7 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     // HUB PUSAT
     // ════════════════════════════════════════════════════════════════════
-    async loadHub() { const d = await this.api('GET','/api/hub'); if(d.success) this.hubList=d.data; },
+    async loadHub() { const d = await this.api('GET','/api/hub'); if(d && d.success) this.hubList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data hub'); },
     async saveHub() {
       const url = this.editingId ? `/api/hub/${this.editingId}` : '/api/hub';
       const method = this.editingId ? 'PUT' : 'POST';
@@ -2283,7 +2934,25 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     // LAPANGAN
     // ════════════════════════════════════════════════════════════════════
-    async loadLapangan() { const d = await this.api('GET','/api/lapangan'); if(d.success) this.lapanganList=d.data; },
+    async loadLapangan() { const d = await this.api('GET','/api/lapangan'); if(d && d.success) this.lapanganList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data lapangan'); },
+    
+    getFilteredLapangan() {
+      if (!this.lapanganList || !Array.isArray(this.lapanganList)) return [];
+      return this.lapanganList.filter(l => {
+        const matchSearch = !this.sewaSearch || (l.nama_lapangan && l.nama_lapangan.toLowerCase().includes(this.sewaSearch.toLowerCase())) || (l.kode && l.kode.includes(this.sewaSearch));
+        const matchCabang = !this.sewaFilterCabang || l.cabang_id == this.sewaFilterCabang;
+        const matchKategori = !this.sewaFilterKategori || l.kategori_lapangan_id == this.sewaFilterKategori;
+        return matchSearch && matchCabang && matchKategori && l.is_active;
+      });
+    },
+
+    getFilteredAdminLapangan() {
+      if (!this.lapanganList || !Array.isArray(this.lapanganList)) return [];
+      return this.lapanganList.filter(l => {
+        return !this.lapanganSearch || (l.nama_lapangan && l.nama_lapangan.toLowerCase().includes(this.lapanganSearch.toLowerCase())) || (l.kode && l.kode.includes(this.lapanganSearch));
+      });
+    },
+
     async saveLapangan() {
       const fd = new FormData();
       const fields = ['hub_pusat_id','cabang_id','kategori_lapangan_id','kode','nama_lapangan','akreditasi','nomor_sk','tanggal_sertifikasi','alamat'];
@@ -2291,11 +2960,15 @@ function sportsApp() {
       if(this.form.dokumen_legalitas) fd.append('dokumen_legalitas', this.form.dokumen_legalitas);
       if(this.form.foto) fd.append('foto', this.form.foto);
       if(this.editingId) fd.append('_method','PUT');
-      const url = this.editingId ? `/api/lapangan/${this.editingId}` : '/api/lapangan';
-      const r = await fetch(url, { method:'POST', headers:{'Accept':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'}, body:fd });
-      const d = await r.json();
-      if(d.success){ this.toast('success',d.message||'Berhasil'); this.modal=''; await this.loadLapangan(); await this.loadLookups(); }
-      else this.toast('error', Object.values(d.errors||{}).flat()[0]||d.message||'Gagal');
+      const url = this.editingId ? `${window.location.origin}/api/lapangan/${this.editingId}` : `${window.location.origin}/api/lapangan`;
+      try {
+        const r = await fetch(url, { method:'POST', headers:{'Accept':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'}, body:fd });
+        const d = await r.json();
+        if(d.success){ this.toast('success',d.message||'Berhasil'); this.modal=''; await this.loadLapangan(); await this.loadLookups(); }
+        else this.toast('error', Object.values(d.errors||{}).flat()[0]||d.message||'Gagal');
+      } catch (e) {
+        this.toast('error', 'Route error / Gagal terhubung ke API: ' + e.message);
+      }
     },
     editLapangan(l) {
       this.editingId=l.id;
@@ -2304,22 +2977,42 @@ function sportsApp() {
         nomor_sk:l.nomor_sk,tanggal_sertifikasi:l.tanggal_sertifikasi,alamat:l.alamat,foto_preview:l.foto};
       this.modal='lap-edit';
     },
+
+    confirmDeleteLapangan(l) {
+      this.deleteConfirm = {
+        show: true,
+        name: l.nama_lapangan,
+        onConfirm: async () => {
+          const d = await this.api('DELETE', `/api/lapangan/${l.id}`);
+          if (d.success) {
+            this.toast('success', `Lapangan "${l.nama_lapangan}" berhasil dihapus`);
+            await this.loadLapangan();
+            await this.loadLookups();
+          } else {
+            this.toast('error', d.message || 'Gagal menghapus lapangan');
+          }
+        }
+      };
+    },
+
     async deleteLapangan(id) {
-      if(!confirm('Yakin hapus lapangan ini?')) return;
       const d = await this.api('DELETE',`/api/lapangan/${id}`);
-      if(d.success){ this.toast('success','Lapangan dihapus'); await this.loadLapangan(); await this.loadLookups(); }
-      else this.toast('error',d.message||'Gagal');
+      if(d.success){ this.toast('success','Lapangan berhasil dihapus'); await this.loadLapangan(); await this.loadLookups(); }
+      else this.toast('error',d.message||'Gagal menghapus lapangan');
     },
 
     // ════════════════════════════════════════════════════════════════════
     // SARANA FASILITAS
     // ════════════════════════════════════════════════════════════════════
-    async loadSarana() { const d = await this.api('GET','/api/sarana'); if(d.success) this.saranaList=d.data; },
+    async loadSarana() { const d = await this.api('GET','/api/sarana'); if(d && d.success) this.saranaList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data sarana'); },
     async saveSarana() {
-      const d = await this.api('POST','/api/sarana',{lapangan_id:this.form.lapangan_id,kode_fasilitas:this.form.kode_fasilitas,nama_unit:this.form.nama_unit,alamat:this.form.alamat});
+      const url = this.editingId ? `/api/sarana/${this.editingId}` : '/api/sarana';
+      const method = this.editingId ? 'PUT' : 'POST';
+      const d = await this.api(method, url, {lapangan_id:this.form.lapangan_id,kode_fasilitas:this.form.kode_fasilitas,nama_unit:this.form.nama_unit,alamat:this.form.alamat});
       if(d.success){ this.toast('success',d.message||'Berhasil'); this.modal=''; await this.loadSarana(); }
       else this.toast('error',Object.values(d.errors||{}).flat()[0]||d.message||'Gagal');
     },
+    editSarana(s) { this.editingId=s.id; this.form={lapangan_id:s.lapangan_id,kode_fasilitas:s.kode_fasilitas,nama_unit:s.nama_unit,alamat:s.alamat}; this.modal='sarana-edit'; },
     async deleteSarana(id) {
       if(!confirm('Yakin hapus sarana ini?')) return;
       const d = await this.api('DELETE',`/api/sarana/${id}`);
@@ -2331,17 +3024,21 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     async loadDokumen() {
       const p = new URLSearchParams(this.dokumenFilter).toString();
-      const d = await this.api('GET','/api/dokumen?'+p); if(d.success) this.dokumenList=d.data;
+      const d = await this.api('GET','/api/dokumen?'+p); if(d && d.success) this.dokumenList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data dokumen');
     },
     sortDokumen(col) { this.dokumenFilter.sort_by=col; this.dokumenFilter.sort_order = this.dokumenFilter.sort_order==='asc'?'desc':'asc'; this.loadDokumen(); },
     async saveDokumen() {
       const fd = new FormData();
       ['nama_dokumen','tahun','kategori','unit_pengunggah','jabatan_pengunggah'].forEach(f=>{ if(this.form[f]) fd.append(f,this.form[f]); });
       if(this.form.file_dokumen) fd.append('file_dokumen',this.form.file_dokumen);
-      const r = await fetch('/api/dokumen',{method:'POST',headers:{'Accept':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:fd});
-      const d = await r.json();
-      if(d.success){ this.toast('success',d.message||'Berhasil'); this.modal=''; await this.loadDokumen(); }
-      else this.toast('error',Object.values(d.errors||{}).flat()[0]||d.message||'Gagal');
+      try {
+        const r = await fetch(`${window.location.origin}/api/dokumen`,{method:'POST',headers:{'Accept':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:fd});
+        const d = await r.json();
+        if(d.success){ this.toast('success',d.message||'Berhasil'); this.modal=''; await this.loadDokumen(); }
+        else this.toast('error', Object.values(d.errors||{}).flat()[0]||d.message||'Gagal');
+      } catch(e) {
+        this.toast('error', 'Gagal API: ' + e.message);
+      }
     },
     async deleteDokumen(id) {
       if(!confirm('Yakin hapus dokumen ini?')) return;
@@ -2354,7 +3051,7 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     async loadTarif() {
       const p = new URLSearchParams(this.tarifFilter).toString();
-      const d = await this.api('GET','/api/tarif?'+p); if(d.success) this.tarifList=d.data;
+      const d = await this.api('GET','/api/tarif?'+p); if(d && d.success) this.tarifList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data tarif');
     },
     async saveTarif() {
       const d = await this.api('POST','/api/tarif',{cabang_id:this.form.cabang_id,tahun:this.form.tahun,nilai_tarif:this.form.nilai_tarif,deskripsi_skema_jam:this.form.deskripsi_skema_jam,periode:this.form.periode,lokasi_lapangan:this.form.lokasi_lapangan});
@@ -2372,7 +3069,7 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     async loadStandar() {
       const d = await this.api('GET','/api/standar');
-      if(d.success) this.standarList = d.data.map(p=>({...p, _open:false}));
+      if(d && d.success) this.standarList = d.data.map(p=>({...p, _open:false})); else this.toast('error', (d && d.message) || 'Gagal memuat data standar');
     },
     openAddChildStandar(parentId) { this.form={ parent_id: parentId, jenis_indikator:'kualitatif' }; this.modal='standar-add'; this.$nextTick(()=>{ if(!this.quillEditor) this.quillEditor=new Quill('#quillEditor',{theme:'snow'}); }); },
     async saveStandar() {
@@ -2390,7 +3087,7 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     // SLOT WAKTU
     // ════════════════════════════════════════════════════════════════════
-    async loadSlot() { const d = await this.api('GET','/api/slot'); if(d.success) this.slotList=d.data; },
+    async loadSlot() { const d = await this.api('GET','/api/slot'); if(d && d.success) this.slotList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data slot waktu'); },
     async saveSlot() {
       const d = await this.api('POST','/api/slot',{lapangan_id:this.form.lapangan_id,tipe_slot:this.form.tipe_slot,tanggal_mulai:this.form.tanggal_mulai,tanggal_selesai:this.form.tanggal_selesai});
       if(d.success){ this.toast('success',d.message||'Berhasil'); this.modal=''; await this.loadSlot(); }
@@ -2408,24 +3105,36 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     async loadTarget() {
       const p = new URLSearchParams(this.targetFilter).toString();
-      const d = await this.api('GET','/api/target?'+p); if(d.success) this.targetList=d.data;
+      const d = await this.api('GET','/api/target?'+p); if(d && d.success) this.targetList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data target');
     },
-    sortTarget(col) { /* client-side sort */ this.targetList.sort((a,b)=>{ const av=col==='nama_lapangan'?(a.lapangan?.nama_lapangan||''):(a[col]||0); const bv=col==='nama_lapangan'?(b.lapangan?.nama_lapangan||''):(b[col]||0); return av>bv?1:av<bv?-1:0; }); },
+    sortTarget(col) { this.targetList.sort((a,b)=>{ const av=col==='nama_lapangan'?(a.lapangan?.nama_lapangan||''):(a[col]||0); const bv=col==='nama_lapangan'?(b.lapangan?.nama_lapangan||''):(b[col]||0); return av>bv?1:av<bv?-1:0; }); },
     async saveTarget() {
-      const d = await this.api('POST','/api/target',{lapangan_id:this.form.lapangan_id,tahun:this.form.tahun,bulan:this.form.bulan,target_jam:this.form.target_jam,realisasi_jam:this.form.realisasi_jam||0});
+      const url = this.editingId ? `/api/target/${this.editingId}` : '/api/target';
+      const method = this.editingId ? 'PUT' : 'POST';
+      const d = await this.api(method, url, {lapangan_id:this.form.lapangan_id,tahun:this.form.tahun,bulan:this.form.bulan,target_jam:this.form.target_jam,realisasi_jam:this.form.realisasi_jam||0});
       if(d.success){ this.toast('success',d.message||'Berhasil'); this.modal=''; await this.loadTarget(); }
       else this.toast('error',Object.values(d.errors||{}).flat()[0]||d.message||'Gagal');
+    },
+    editTarget(t) { this.editingId=t.id; this.form={lapangan_id:t.lapangan_id,tahun:t.tahun,bulan:t.bulan,target_jam:t.target_jam,realisasi_jam:t.realisasi_jam}; this.modal='target-edit'; },
+    async deleteTarget(id) {
+      if(!confirm('Yakin hapus target keterisian ini?')) return;
+      const d = await this.api('DELETE',`/api/target/${id}`);
+      if(d.success){ this.toast('success','Target dihapus'); await this.loadTarget(); }
+      else this.toast('error',d.message||'Gagal');
     },
 
     // ════════════════════════════════════════════════════════════════════
     // STAF QC
     // ════════════════════════════════════════════════════════════════════
-    async loadStafQC() { const d = await this.api('GET','/api/staf-qc'); if(d.success) this.stafQCList=d.data; },
+    async loadStafQC() { const d = await this.api('GET','/api/staf-qc'); if(d && d.success) this.stafQCList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data staf QC'); },
     async saveStafQC() {
-      const d = await this.api('POST','/api/staf-qc',{nik:this.form.nik,nama_staf:this.form.nama_staf,gelar:this.form.gelar,jenis_kelamin:this.form.jenis_kelamin,jabatan:this.form.jabatan,cabang_id:this.form.cabang_id,lapangan_id:this.form.lapangan_id});
+      const url = this.editingId ? `/api/staf-qc/${this.editingId}` : '/api/staf-qc';
+      const method = this.editingId ? 'PUT' : 'POST';
+      const d = await this.api(method, url, {nik:this.form.nik,nama_staf:this.form.nama_staf,gelar:this.form.gelar,jenis_kelamin:this.form.jenis_kelamin,jabatan:this.form.jabatan,cabang_id:this.form.cabang_id,lapangan_id:this.form.lapangan_id});
       if(d.success){ this.toast('success',d.message||'Berhasil'); this.modal=''; await this.loadStafQC(); }
       else this.toast('error',Object.values(d.errors||{}).flat()[0]||d.message||'Gagal');
     },
+    editStafQC(s) { this.editingId=s.id; this.form={nik:s.nik,nama_staf:s.nama_staf,gelar:s.gelar,jenis_kelamin:s.jenis_kelamin,jabatan:s.jabatan,cabang_id:s.cabang_id,lapangan_id:s.lapangan_id}; this.modal='qc-edit'; },
     async deleteStafQC(id) {
       if(!confirm('Yakin hapus staf QC ini?')) return;
       const d = await this.api('DELETE',`/api/staf-qc/${id}`);
@@ -2435,8 +3144,9 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     // KATEGORI TEMUAN
     // ════════════════════════════════════════════════════════════════════
-    async loadTemuan() { const d = await this.api('GET','/api/temuan'); if(d.success) this.temuanList=d.data; },
+    async loadTemuan() { const d = await this.api('GET','/api/temuan'); if(d && d.success) this.temuanList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data temuan'); },
     async saveTemuan() {
+      if(this.form.nama_temuan && !this.form.jenis_temuan) this.form.jenis_temuan='Negatif';
       const d = await this.api('POST','/api/temuan',{nama_temuan:this.form.nama_temuan,jenis_temuan:this.form.jenis_temuan});
       if(d.success){ this.toast('success',d.message||'Berhasil'); this.form={jenis_temuan:'Negatif'}; await this.loadTemuan(); }
       else this.toast('error',Object.values(d.errors||{}).flat()[0]||d.message||'Gagal');
@@ -2453,19 +3163,28 @@ function sportsApp() {
     async loadRekap() {
       const p = new URLSearchParams({search:this.rekapSearch, page:this.rekapPage, per_page:8}).toString();
       const d = await this.api('GET','/api/rekap?'+p);
-      if(d.success){ this.rekapList=d.data.data||[]; this.rekapTotalPages=Math.max(1, d.data.last_page||1); }
+      if(d && d.success){ this.rekapList=d.data.data||[]; this.rekapTotalPages=Math.max(1, d.data.last_page||1); } else { this.toast('error', (d && d.message) || 'Gagal memuat data rekap'); }
     },
     sortRekap(col) { this.rekapList.sort((a,b)=>{ const av=col==='lapangan'?(a.lapangan?.nama_lapangan||''):(a[col]||0); const bv=col==='lapangan'?(b.lapangan?.nama_lapangan||''):(b[col]||0); return av>bv?1:av<bv?-1:0; }); },
     async saveRekap() {
-      const d = await this.api('POST','/api/rekap',{lapangan_id:this.form.lapangan_id,target_keterisian_jam:this.form.target_keterisian_jam,nilai_kondisi_mandiri:this.form.nilai_kondisi_mandiri,nilai_tim_qc:this.form.nilai_tim_qc,grade:this.form.grade,bintang:this.form.bintang});
+      const url = this.editingId ? `/api/rekap/${this.editingId}` : '/api/rekap';
+      const method = this.editingId ? 'PUT' : 'POST';
+      const d = await this.api(method, url, {lapangan_id:this.form.lapangan_id,target_keterisian_jam:this.form.target_keterisian_jam,nilai_kondisi_mandiri:this.form.nilai_kondisi_mandiri,nilai_tim_qc:this.form.nilai_tim_qc,grade:this.form.grade,bintang:this.form.bintang});
       if(d.success){ this.toast('success',d.message||'Berhasil'); this.modal=''; await this.loadRekap(); }
       else this.toast('error',Object.values(d.errors||{}).flat()[0]||d.message||'Gagal');
+    },
+    editRekap(r) { this.editingId=r.id; this.form={lapangan_id:r.lapangan_id,target_keterisian_jam:r.target_keterisian_jam,nilai_kondisi_mandiri:r.nilai_kondisi_mandiri,nilai_tim_qc:r.nilai_tim_qc,grade:r.grade,bintang:r.bintang}; this.modal='rekap-edit'; },
+    async deleteRekap(id) {
+      if(!confirm('Yakin hapus rekap kelayakan ini?')) return;
+      const d = await this.api('DELETE',`/api/rekap/${id}`);
+      if(d.success){ this.toast('success','Rekap dihapus'); await this.loadRekap(); }
+      else this.toast('error',d.message||'Gagal');
     },
 
     // ════════════════════════════════════════════════════════════════════
     // USER MANAGEMENT: MEMBERS
     // ════════════════════════════════════════════════════════════════════
-    async loadMembers() { const d = await this.api('GET','/api/users/member'); if(d.success) this.memberList=d.data; },
+    async loadMembers() { const d = await this.api('GET','/api/users/member'); if(d && d.success) this.memberList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data member'); },
     async saveMember() {
       const url = this.editingId ? `/api/users/member/${this.editingId}` : '/api/users/member';
       const method = this.editingId ? 'PUT' : 'POST';
@@ -2489,7 +3208,7 @@ function sportsApp() {
     // ════════════════════════════════════════════════════════════════════
     // USER MANAGEMENT: STAFF
     // ════════════════════════════════════════════════════════════════════
-    async loadStaff() { const d = await this.api('GET','/api/users/staff'); if(d.success) this.staffList=d.data; },
+    async loadStaff() { const d = await this.api('GET','/api/users/staff'); if(d && d.success) this.staffList=d.data; else this.toast('error', (d && d.message) || 'Gagal memuat data staf'); },
     async saveStaff() {
       const url = this.editingId ? `/api/users/staff/${this.editingId}` : '/api/users/staff';
       const method = this.editingId ? 'PUT' : 'POST';

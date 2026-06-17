@@ -87,12 +87,15 @@ Route::post  ('/api/slot',         [SlotWaktuController::class, 'store']);
 Route::delete('/api/slot/{id}',    [SlotWaktuController::class, 'destroy']);
 
 // ─── Target Keterisian ───────────────────────────────────────────────────────
-Route::get   ('/api/target',       [TargetKeterisianController::class, 'index']);
-Route::post  ('/api/target',       [TargetKeterisianController::class, 'store']);
+Route::get   ('/api/target',          [TargetKeterisianController::class, 'index']);
+Route::post  ('/api/target',          [TargetKeterisianController::class, 'store']);
+Route::put   ('/api/target/{id}',     [TargetKeterisianController::class, 'update']);
+Route::delete('/api/target/{id}',     [TargetKeterisianController::class, 'destroy']);
 
 // ─── Staf QC ─────────────────────────────────────────────────────────────────
 Route::get   ('/api/staf-qc',      [StafQCController::class, 'index']);
 Route::post  ('/api/staf-qc',      [StafQCController::class, 'store']);
+Route::put   ('/api/staf-qc/{id}', [StafQCController::class, 'update']);
 Route::delete('/api/staf-qc/{id}', [StafQCController::class, 'destroy']);
 
 // ─── Kategori Temuan ─────────────────────────────────────────────────────────
@@ -103,6 +106,8 @@ Route::delete('/api/temuan/{id}',  [KategoriTemuanController::class, 'destroy'])
 // ─── Rekap Kelayakan ─────────────────────────────────────────────────────────
 Route::get   ('/api/rekap',        [RekapKelayakanController::class, 'index']);
 Route::post  ('/api/rekap',        [RekapKelayakanController::class, 'store']);
+Route::put   ('/api/rekap/{id}',   [RekapKelayakanController::class, 'update']);
+Route::delete('/api/rekap/{id}',   [RekapKelayakanController::class, 'destroy']);
 
 // ─── User Management ─────────────────────────────────────────────────────────
 Route::get   ('/api/users/member',                  [UserController::class, 'indexMembers']);

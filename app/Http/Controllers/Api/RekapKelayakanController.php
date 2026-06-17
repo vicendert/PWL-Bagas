@@ -64,4 +64,28 @@ class RekapKelayakanController extends Controller
             'data' => $rekap
         ]);
     }
+
+    public function update(Request $request, $id)
+    {
+        $rekap = RekapKelayakan::findOrFail($id);
+        $validator = Validator::make($request->all(), [
+            'lapangan_id' => 'required|exists:lapangan,id',
+            'target_keterisian_jam' => 'required|integer|min:1',
+            'nilai_kondisi_mandiri' => 'required|numeric|min:0|max:100',
+            'nilai_tim_qc' => 'required|numeric|min:0|max:100',
+            'grade' => 'required|in:A,B,C,D,E',
+            'bintang' => 'required|integer|min:1|max:5',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+        $rekap->update($request->all());
+        return response()->json(['success' => true, 'message' => 'Rekap berhasil diperbarui', 'data' => $rekap]);
+    }
+
+    public function destroy($id)
+    {
+        RekapKelayakan::findOrFail($id)->delete();
+        return response()->json(['success' => true, 'message' => 'Rekap berhasil dihapus']);
+    }
 }

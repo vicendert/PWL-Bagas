@@ -60,8 +60,8 @@ class DokumenOperasionalController extends Controller
         $data = $request->except('file_dokumen');
 
         if ($request->hasFile('file_dokumen')) {
-            $path = $request->file('file_dokumen')->store('public/dokumen');
-            $data['file_path'] = Storage::url($path);
+            $path = $request->file('file_dokumen')->store('dokumen', 'public');
+            $data['file_path'] = '/storage/' . $path;
         }
 
         $dokumen = DokumenOperasional::create($data);
@@ -78,8 +78,8 @@ class DokumenOperasionalController extends Controller
         $dokumen = DokumenOperasional::findOrFail($id);
 
         if ($dokumen->file_path) {
-            $oldPath = str_replace('/storage/', 'public/', $dokumen->file_path);
-            Storage::delete($oldPath);
+            $oldPath = ltrim(str_replace('/storage/', '', parse_url($dokumen->file_path, PHP_URL_PATH)), '/');
+            Storage::disk('public')->delete($oldPath);
         }
 
         $dokumen->delete();
